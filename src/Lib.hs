@@ -78,9 +78,9 @@ app :: BotConfig -> Application
 app config = serve botApi $ initBotServer config
 
 initBotServer :: BotConfig -> Server BotAPI
-initBotServer config = enter (transform config) botServer
-    where transform :: BotConfig -> Bot :~> ExceptT ServantErr IO
-          transform config = Nat (flip runReaderT config . runBot)
+initBotServer config = hoistServer botApi (transform config) botServer
+    where transform :: BotConfig -> Bot a -> Handler a
+          transform config = flip runReaderT config . runBot
 
 -- actual server implementation
 botServer :: ServerT BotAPI Bot
